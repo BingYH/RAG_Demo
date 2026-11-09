@@ -33,8 +33,11 @@ chroma_db/
 .langgraph_api/
 logs/
 *.log
+!simulator/scenarios/*/diagnostic.log
 tmp/
 .cache/
+data/
+evaluation/results/
 
 # External reference repositories
 references/

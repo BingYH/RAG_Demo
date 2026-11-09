@@ -1,0 +1,186 @@
+{
+  "recorded_at": "2026-11-08T13:38:25+01:00",
+  "repositories": [
+    {
+      "name": "docs",
+      "repository": "https://github.com/frankarobotics/docs",
+      "branch": "master",
+      "commit": "5f2832694302e142269a34afba60b39b33bcb237",
+      "dirty": false,
+      "license_path": "references/repos/docs/LICENSE",
+      "license_sha256": "6d1d968fb225eca367cb7f0b8831ab012a35d92b547e945e17ef8e7b05c3e5cc",
+      "files": [
+        {
+          "path": "references/repos/docs/source/index.rst",
+          "sha256": "7ed2ab7d71b3ed6f92f65fb33c49ba6d853f120c198c53d1be162429bb18e9fc",
+          "upstream_url": "https://github.com/frankarobotics/docs/blob/5f2832694302e142269a34afba60b39b33bcb237/source/index.rst"
+        },
+        {
+          "path": "references/repos/docs/source/overview.rst",
+          "sha256": "73efd8c8558085d6c948bec0cf050c76e270002d30e922aec19a2cfcec145d97",
+          "upstream_url": "https://github.com/frankarobotics/docs/blob/5f2832694302e142269a34afba60b39b33bcb237/source/overview.rst"
+        },
+        {
+          "path": "references/repos/docs/source/troubleshooting.rst",
+          "sha256": "4b1d9b64dfc2bddfb31d0467e11694b54acd9d0308e7471c63ddb5debd2dd94e",
+          "upstream_url": "https://github.com/frankarobotics/docs/blob/5f2832694302e142269a34afba60b39b33bcb237/source/troubleshooting.rst"
+        },
+        {
+          "path": "references/repos/docs/source/compatibility.rst",
+          "sha256": "4e06741dab691d0129d5ce4520bb42909f9e4bc9d4fff29cf78becc6821314b0",
+          "upstream_url": "https://github.com/frankarobotics/docs/blob/5f2832694302e142269a34afba60b39b33bcb237/source/compatibility.rst"
+        },
+        {
+          "path": "references/repos/docs/source/_static/compatibility_data.py",
+          "sha256": "e955905b04abc2db5bdd5f657019d80c0c88ce7decba9ec636f72d1856bc99b6",
+          "upstream_url": "https://github.com/frankarobotics/docs/blob/5f2832694302e142269a34afba60b39b33bcb237/source/_static/compatibility_data.py"
+        },
+        {
+          "path": "references/repos/docs/upstream.repos",
+          "sha256": "39e454509f7ac141c4ff8ad5207390b624e60bac348ae6bf2c9e3cf3b8c99fed",
+          "upstream_url": "https://github.com/frankarobotics/docs/blob/5f2832694302e142269a34afba60b39b33bcb237/upstream.repos"
+        }
+      ]
+    },
+    {
+      "name": "libfranka",
+      "repository": "https://github.com/frankarobotics/libfranka",
+      "branch": "main",
+      "commit": "e88d08f64cbf842b8f53c0b551963684064038d6",
+      "dirty": false,
+      "license_path": "references/repos/libfranka/LICENSE",
+      "license_sha256": "6d1d968fb225eca367cb7f0b8831ab012a35d92b547e945e17ef8e7b05c3e5cc",
+      "files": [
+        {
+          "path": "references/repos/libfranka/docs/overview.rst",
+          "sha256": "beb79eb5369e9b9d23e7c66686818279696f57a9ca8dc4349c442914dfd74185",
+          "upstream_url": "https://github.com/frankarobotics/libfranka/blob/e88d08f64cbf842b8f53c0b551963684064038d6/docs/overview.rst"
+        },
+        {
+          "path": "references/repos/libfranka/docs/system_requirements.rst",
+          "sha256": "a84d34351ba06275f414049045d10a40f5a664656512ff8eff22075f311f98ec",
+          "upstream_url": "https://github.com/frankarobotics/libfranka/blob/e88d08f64cbf842b8f53c0b551963684064038d6/docs/system_requirements.rst"
+        },
+        {
+          "path": "references/repos/libfranka/docs/getting_started.rst",
+          "sha256": "373be0df0874e88d0dedb8fe6acbeb75985b24b80ffd06acd03d6767e67e07a3",
+          "upstream_url": "https://github.com/frankarobotics/libfranka/blob/e88d08f64cbf842b8f53c0b551963684064038d6/docs/getting_started.rst"
+        },
+        {
+          "path": "references/repos/libfranka/docs/compatibility_matrix.rst",
+          "sha256": "c59ca1c90a618f91e37a323bbc624fe697ad98139b52e732a096c5d262a17e12",
+          "upstream_url": "https://github.com/frankarobotics/libfranka/blob/e88d08f64cbf842b8f53c0b551963684064038d6/docs/compatibility_matrix.rst"
+        },
+        {
+          "path": "references/repos/libfranka/docs/installation.rst",
+          "sha256": "692eb488130016a45a8e4d02debab79e9adc9515b94b91aae50665ab6548189e",
+          "upstream_url": "https://github.com/frankarobotics/libfranka/blob/e88d08f64cbf842b8f53c0b551963684064038d6/docs/installation.rst"
+        }
+      ]
+    },
+    {
+      "name": "franka_ros2",
+      "repository": "https://github.com/frankarobotics/franka_ros2",
+      "branch": "jazzy",
+      "commit": "8c946641bdedaf20c35604d8bc5a809117e4ed6c",
+      "dirty": false,
+      "license_path": "references/repos/franka_ros2/LICENSE",
+      "license_sha256": "6d1d968fb225eca367cb7f0b8831ab012a35d92b547e945e17ef8e7b05c3e5cc",
+      "files": [
+        {
+          "path": "references/repos/franka_ros2/README.md",
+          "sha256": "903da1184f41117022208aa07ed92252a283b11b64aa669787a4dc6a68059123",
+          "upstream_url": "https://github.com/frankarobotics/franka_ros2/blob/8c946641bdedaf20c35604d8bc5a809117e4ed6c/README.md"
+        },
+        {
+          "path": "references/repos/franka_ros2/franka_bringup/doc/index.rst",
+          "sha256": "54dad5e756d69986d4d5da7a2ba12836b7f03f491da3dabb5d96a1088f8ab44a",
+          "upstream_url": "https://github.com/frankarobotics/franka_ros2/blob/8c946641bdedaf20c35604d8bc5a809117e4ed6c/franka_bringup/doc/index.rst"
+        },
+        {
+          "path": "references/repos/franka_ros2/franka_bringup/config/franka.config.yaml",
+          "sha256": "f51c6fb750c1906c0c287e1441066cd60582dc6af934e09071b9cfd64260edfc",
+          "upstream_url": "https://github.com/frankarobotics/franka_ros2/blob/8c946641bdedaf20c35604d8bc5a809117e4ed6c/franka_bringup/config/franka.config.yaml"
+        },
+        {
+          "path": "references/repos/franka_ros2/franka_bringup/launch/franka.launch.py",
+          "sha256": "1deed7346ec50743afac78dd741479123eb2dddf554c42935f6dbc6dcce321ba",
+          "upstream_url": "https://github.com/frankarobotics/franka_ros2/blob/8c946641bdedaf20c35604d8bc5a809117e4ed6c/franka_bringup/launch/franka.launch.py"
+        },
+        {
+          "path": "references/repos/franka_ros2/franka_example_controllers/src/fr3/joint_impedance_example_controller.cpp",
+          "sha256": "3d17eec9abed9cb29f032e5e1b8aeecb2f9d373f737efdd3a9c0fb234e7e0c0a",
+          "upstream_url": "https://github.com/frankarobotics/franka_ros2/blob/8c946641bdedaf20c35604d8bc5a809117e4ed6c/franka_example_controllers/src/fr3/joint_impedance_example_controller.cpp"
+        }
+      ]
+    },
+    {
+      "name": "franka_description",
+      "repository": "https://github.com/frankarobotics/franka_description",
+      "branch": "main",
+      "commit": "7aeeddc449edf8d62b594f9e36a81da53e7796f9",
+      "dirty": false,
+      "license_path": "references/repos/franka_description/LICENSE",
+      "license_sha256": "f048c20aac4c6e7ca76d9c0e1fb891485d48813a52750913d1b3ee1b1a96af55",
+      "files": [
+        {
+          "path": "references/repos/franka_description/README.rst",
+          "sha256": "a57c21fb812e9a29730c0a5a8ca81723c43f97be877000fd9b02f61e31e88170",
+          "upstream_url": "https://github.com/frankarobotics/franka_description/blob/7aeeddc449edf8d62b594f9e36a81da53e7796f9/README.rst"
+        }
+      ]
+    },
+    {
+      "name": "labs",
+      "repository": "https://github.com/frankarobotics/labs",
+      "branch": "main",
+      "commit": "20a5913a56e7349f03d45085364db3f09deaac6f",
+      "dirty": false,
+      "license_path": "references/repos/labs/LICENSE",
+      "license_sha256": "6d1d968fb225eca367cb7f0b8831ab012a35d92b547e945e17ef8e7b05c3e5cc",
+      "files": [
+        {
+          "path": "references/repos/labs/README.md",
+          "sha256": "9498d978e673f69c5f73748433e480eada1540b6800a228b6e86583506a41e93",
+          "upstream_url": "https://github.com/frankarobotics/labs/blob/20a5913a56e7349f03d45085364db3f09deaac6f/README.md"
+        }
+      ]
+    },
+    {
+      "name": "libfranka-common",
+      "repository": "https://github.com/frankarobotics/libfranka-common",
+      "branch": "master",
+      "commit": "2e090a65e51c94a98f9fc82b6ec3d1aa54d0f85f",
+      "dirty": false,
+      "license_path": "references/repos/libfranka-common/LICENSE",
+      "license_sha256": "6d1d968fb225eca367cb7f0b8831ab012a35d92b547e945e17ef8e7b05c3e5cc",
+      "files": [
+        {
+          "path": "references/repos/libfranka-common/README.md",
+          "sha256": "c41562378e8d1055e6974e5ea982d706d1f74a51d1162d238ade998e70b5993c",
+          "upstream_url": "https://github.com/frankarobotics/libfranka-common/blob/2e090a65e51c94a98f9fc82b6ec3d1aa54d0f85f/README.md"
+        },
+        {
+          "path": "references/repos/libfranka-common/CHANGELOG.md",
+          "sha256": "0f4c48df9916e77b5999602bcf593afa6bb39353324356b78319515d8f5db7a5",
+          "upstream_url": "https://github.com/frankarobotics/libfranka-common/blob/2e090a65e51c94a98f9fc82b6ec3d1aa54d0f85f/CHANGELOG.md"
+        },
+        {
+          "path": "references/repos/libfranka-common/include/research_interface/robot/service_types.h",
+          "sha256": "6dd71d6b36a8b68dfe2948dbeaf5b7ecfbafa26bd6647d7567366817f4efc77b",
+          "upstream_url": "https://github.com/frankarobotics/libfranka-common/blob/2e090a65e51c94a98f9fc82b6ec3d1aa54d0f85f/include/research_interface/robot/service_types.h"
+        },
+        {
+          "path": "references/repos/libfranka-common/include/research_interface/robot/rbk_types.h",
+          "sha256": "48c525299339f9b9767705b0a693456dbca02b62881c82a9f7c81f16731d4d30",
+          "upstream_url": "https://github.com/frankarobotics/libfranka-common/blob/2e090a65e51c94a98f9fc82b6ec3d1aa54d0f85f/include/research_interface/robot/rbk_types.h"
+        },
+        {
+          "path": "references/repos/libfranka-common/include/research_interface/gripper/types.h",
+          "sha256": "34c91f4d79beec46428b330a5019098a8877b5168b73acd66ce5b2968718a037",
+          "upstream_url": "https://github.com/frankarobotics/libfranka-common/blob/2e090a65e51c94a98f9fc82b6ec3d1aa54d0f85f/include/research_interface/gripper/types.h"
+        }
+      ]
+    }
+  ]
+}

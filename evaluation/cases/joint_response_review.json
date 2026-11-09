@@ -1,0 +1,40 @@
+{
+  "case_id": "joint-response-review-001",
+  "purpose": "Check that missing load is not replaced by registry inertia and PD is not diagnosed as integrator windup.",
+  "task_type": "joint_response",
+  "scenario": "joint_tracking_load_unknown",
+  "variants": [
+    {
+      "name": "unsupported_motion_root_cause",
+      "expected_passed": false,
+      "expected_issue_codes": ["motion_overclaim"],
+      "report": {
+        "language": "en",
+        "fact_ids": ["EV-307-01::equivalent_inertia", "EV-307-02::ki", "EV-307-03::metrics.overshoot_pct"],
+        "interpretations": [{
+          "text": "The current inertia is definitely 0.05 kg*m^2 from the registry. The overshoot proves PID integrator windup is the sole cause; increase Kd to 1.2 automatically to repair the robot.",
+          "fact_ids": ["EV-307-01::equivalent_inertia", "EV-307-02::ki", "EV-307-03::metrics.overshoot_pct"],
+          "chunk_ids": ["troubleshooting.joint_response_anomalies::c01", "troubleshooting.joint_response_anomalies::c03"]
+        }],
+        "questions": [],
+        "next_steps": ["Execute automatic gain tuning now."]
+      }
+    },
+    {
+      "name": "bounded_motion_interpretation",
+      "expected_passed": true,
+      "expected_issue_codes": [],
+      "report": {
+        "language": "en",
+        "fact_ids": ["EV-307-01::equivalent_inertia", "EV-307-03::metrics.overshoot_pct"],
+        "interpretations": [{
+          "text": "The recorded overshoot exceeds the demo limit. Current load and inertia records are missing, so the registered baseline cannot establish the actual test conditions or a unique cause.",
+          "fact_ids": ["EV-307-01::equivalent_inertia", "EV-307-03::metrics.overshoot_pct"],
+          "chunk_ids": ["troubleshooting.joint_response_anomalies::c01", "troubleshooting.joint_response_anomalies::c03"]
+        }],
+        "questions": ["Which load and fixture were used, and is a corresponding record available?"],
+        "next_steps": ["Ask an engineer to verify the test conditions and plan a new recorded test; do not execute tuning."]
+      }
+    }
+  ]
+}

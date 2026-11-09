@@ -1,0 +1,8 @@
+{"event_id": "LOG-017-01", "timestamp": "2026-11-07T10:00:00Z", "level": "INFO", "component": "startup", "startup_attempt_id": "ATT-041", "message": "Initialization attempt started in fixture mode."}
+{"event_id": "LOG-017-02", "timestamp": "2026-11-07T10:00:01Z", "level": "INFO", "component": "configuration", "startup_attempt_id": "ATT-041", "message": "Loaded CFG-007; target_ip=192.0.2.11; client_version=1.4.0."}
+{"event_id": "LOG-017-03", "timestamp": "2026-11-07T10:00:02Z", "level": "INFO", "component": "network", "startup_attempt_id": "ATT-041", "message": "Workstation interface link is up."}
+{"event_id": "LOG-017-04", "timestamp": "2026-11-07T10:00:03Z", "level": "INFO", "component": "network", "startup_attempt_id": "ATT-041", "message": "Ping observation for 192.0.2.11: 3 sent, 3 received."}
+{"event_id": "LOG-017-05", "timestamp": "2026-11-07T10:00:04Z", "level": "INFO", "component": "handshake", "startup_attempt_id": "ATT-041", "message": "Handshake accepted; controller_version=1.3.0; reported_protocol=1."}
+{"event_id": "LOG-017-06", "timestamp": "2026-11-07T10:00:05Z", "level": "INFO", "component": "state_receiver", "startup_attempt_id": "ATT-041", "message": "First valid controller state record received."}
+{"event_id": "LOG-017-07", "timestamp": "2026-11-07T10:00:07Z", "level": "INFO", "component": "state_receiver", "startup_attempt_id": "ATT-041", "message": "Observation window closed: 4 valid records in 2 seconds."}
+{"event_id": "LOG-017-08", "timestamp": "2026-11-07T10:00:08Z", "level": "INFO", "component": "startup", "startup_attempt_id": "ATT-041", "message": "Initialization reached diagnostic_ready."}

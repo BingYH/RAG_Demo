@@ -1,0 +1,113 @@
+{
+  "schema_version": "1.0",
+  "snapshot_at": "2026-11-07T10:00:08Z",
+  "bench_id": "BENCH-001",
+  "snapshot_id": "SNAP-017",
+  "observations": {
+    "read_bench_inventory": {
+      "bench_id": "BENCH-001",
+      "snapshot_id": "SNAP-017",
+      "evidence_id": "EV-017-01",
+      "source_type": "synthetic",
+      "observation_origin": "asset_registry",
+      "observed_at": "2026-11-06T09:00:00Z",
+      "status": "ok",
+      "data": {
+        "robot_model": "DEMO-ARM-7",
+        "registered_workstation_address": "192.0.2.10/24",
+        "registered_controller_address": "192.0.2.11",
+        "expected_client_version": "1.4.0",
+        "expected_controller_version": "1.3.0"
+      },
+      "unavailable_fields": []
+    },
+    "read_runtime_config": {
+      "bench_id": "BENCH-001",
+      "snapshot_id": "SNAP-017",
+      "evidence_id": "EV-017-02",
+      "source_type": "synthetic",
+      "observation_origin": "runtime_observation",
+      "observed_at": "2026-11-07T10:00:01Z",
+      "status": "ok",
+      "data": {
+        "client_name": "demo-client",
+        "client_version": "1.4.0",
+        "supported_protocols": [
+          1
+        ],
+        "config_revision": "CFG-007",
+        "target_ip": "192.0.2.11",
+        "execution_mode": "fixture",
+        "startup_attempt_id": "ATT-041",
+        "workstation_address": "192.0.2.10/24",
+        "change_records": []
+      },
+      "unavailable_fields": []
+    },
+    "read_connection_observations": {
+      "bench_id": "BENCH-001",
+      "snapshot_id": "SNAP-017",
+      "evidence_id": "EV-017-03",
+      "source_type": "synthetic",
+      "observation_origin": "runtime_observation",
+      "observed_at": "2026-11-07T10:00:04Z",
+      "status": "ok",
+      "data": {
+        "startup_attempt_id": "ATT-041",
+        "target_ip": "192.0.2.11",
+        "link_up": true,
+        "ping": {
+          "status": "reply",
+          "sent": 3,
+          "received": 3,
+          "rtt_ms": 0.4
+        },
+        "handshake_status": "accepted",
+        "controller_version": "1.3.0",
+        "reported_protocol": 1
+      },
+      "unavailable_fields": []
+    },
+    "read_initialization_status": {
+      "bench_id": "BENCH-001",
+      "snapshot_id": "SNAP-017",
+      "evidence_id": "EV-017-04",
+      "source_type": "synthetic",
+      "observation_origin": "runtime_observation",
+      "observed_at": "2026-11-07T10:00:08Z",
+      "status": "partial",
+      "data": {
+        "startup_attempt_id": "ATT-041",
+        "status": "ready",
+        "last_completed_stage": "diagnostic_ready",
+        "failed_stage": null,
+        "error_code": null,
+        "error_message": null,
+        "external_interface_enabled": true,
+        "state_stream": {
+          "valid_records": 4,
+          "window_seconds": 2,
+          "window_start": "2026-11-07T10:00:05Z",
+          "window_end": "2026-11-07T10:00:07Z"
+        },
+        "ros2_nodes": null
+      },
+      "unavailable_fields": [
+        {
+          "field": "ros2_nodes",
+          "reason": "not_collected"
+        }
+      ]
+    }
+  },
+  "log_stream": {
+    "bench_id": "BENCH-001",
+    "snapshot_id": "SNAP-017",
+    "evidence_id": "EV-017-05",
+    "source_type": "synthetic",
+    "observation_origin": "runtime_observation",
+    "observed_at": "2026-11-07T10:00:08Z",
+    "status": "ok",
+    "unavailable_fields": []
+  }
+}

@@ -1,0 +1,2 @@
+# Linux setup scripts must retain LF when checked out on Windows.
+scripts/*.sh text eol=lf

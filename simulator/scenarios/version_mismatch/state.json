@@ -1,0 +1,138 @@
+{
+  "schema_version": "1.0",
+  "snapshot_at": "2026-11-07T10:00:08Z",
+  "bench_id": "BENCH-001",
+  "snapshot_id": "SNAP-026",
+  "observations": {
+    "read_bench_inventory": {
+      "bench_id": "BENCH-001",
+      "snapshot_id": "SNAP-026",
+      "evidence_id": "EV-026-01",
+      "source_type": "synthetic",
+      "observation_origin": "asset_registry",
+      "observed_at": "2026-11-06T09:00:00Z",
+      "status": "ok",
+      "data": {
+        "robot_model": "DEMO-ARM-7",
+        "registered_workstation_address": "192.0.2.10/24",
+        "registered_controller_address": "192.0.2.11",
+        "expected_client_version": "1.4.0",
+        "expected_controller_version": "1.3.0"
+      },
+      "unavailable_fields": []
+    },
+    "read_runtime_config": {
+      "bench_id": "BENCH-001",
+      "snapshot_id": "SNAP-026",
+      "evidence_id": "EV-026-02",
+      "source_type": "synthetic",
+      "observation_origin": "runtime_observation",
+      "observed_at": "2026-11-07T10:00:01Z",
+      "status": "ok",
+      "data": {
+        "client_name": "demo-client",
+        "client_version": "2.0.0",
+        "supported_protocols": [
+          2
+        ],
+        "config_revision": "CFG-007",
+        "target_ip": "192.0.2.11",
+        "execution_mode": "fixture",
+        "startup_attempt_id": "ATT-058",
+        "workstation_address": "192.0.2.10/24",
+        "change_records": [
+          {
+            "changed_at": "2026-11-07T09:50:00Z",
+            "component": "demo-client",
+            "field": "client_version",
+            "previous": "1.4.0",
+            "current": "2.0.0",
+            "record_origin": "deployment_record"
+          }
+        ]
+      },
+      "unavailable_fields": []
+    },
+    "read_connection_observations": {
+      "bench_id": "BENCH-001",
+      "snapshot_id": "SNAP-026",
+      "evidence_id": "EV-026-03",
+      "source_type": "synthetic",
+      "observation_origin": "runtime_observation",
+      "observed_at": "2026-11-07T10:00:04Z",
+      "status": "ok",
+      "data": {
+        "startup_attempt_id": "ATT-058",
+        "target_ip": "192.0.2.11",
+        "link_up": true,
+        "ping": {
+          "status": "reply",
+          "sent": 3,
+          "received": 3,
+          "rtt_ms": 0.4
+        },
+        "handshake_status": "rejected",
+        "controller_version": "1.3.0",
+        "reported_protocol": 1
+      },
+      "unavailable_fields": []
+    },
+    "read_initialization_status": {
+      "bench_id": "BENCH-001",
+      "snapshot_id": "SNAP-026",
+      "evidence_id": "EV-026-04",
+      "source_type": "synthetic",
+      "observation_origin": "runtime_observation",
+      "observed_at": "2026-11-07T10:00:08Z",
+      "status": "partial",
+      "data": {
+        "startup_attempt_id": "ATT-058",
+        "status": "failed",
+        "last_completed_stage": "endpoint_reachable",
+        "failed_stage": "handshake_accepted",
+        "error_code": "DEMO_PROTOCOL_MISMATCH",
+        "error_message": "Handshake rejected: observed protocol 1 is not in supported protocols [2].",
+        "external_interface_enabled": null,
+        "state_stream": {
+          "valid_records": null,
+          "window_seconds": 2,
+          "window_start": null,
+          "window_end": null
+        },
+        "ros2_nodes": null
+      },
+      "unavailable_fields": [
+        {
+          "field": "ros2_nodes",
+          "reason": "not_collected"
+        },
+        {
+          "field": "external_interface_enabled",
+          "reason": "not_collected"
+        },
+        {
+          "field": "state_stream.valid_records",
+          "reason": "not_collected"
+        },
+        {
+          "field": "state_stream.window_start",
+          "reason": "not_collected"
+        },
+        {
+          "field": "state_stream.window_end",
+          "reason": "not_collected"
+        }
+      ]
+    }
+  },
+  "log_stream": {
+    "bench_id": "BENCH-001",
+    "snapshot_id": "SNAP-026",
+    "evidence_id": "EV-026-05",
+    "source_type": "synthetic",
+    "observation_origin": "runtime_observation",
+    "observed_at": "2026-11-07T10:00:08Z",
+    "status": "ok",
+    "unavailable_fields": []
+  }
+}

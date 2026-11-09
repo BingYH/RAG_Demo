@@ -1,0 +1,6 @@
+{"event_id": "LOG-026-01", "timestamp": "2026-11-07T10:00:00Z", "level": "INFO", "component": "startup", "startup_attempt_id": "ATT-058", "message": "Initialization attempt started in fixture mode."}
+{"event_id": "LOG-026-02", "timestamp": "2026-11-07T10:00:01Z", "level": "INFO", "component": "configuration", "startup_attempt_id": "ATT-058", "message": "Loaded CFG-007; target_ip=192.0.2.11; client_version=2.0.0."}
+{"event_id": "LOG-026-03", "timestamp": "2026-11-07T10:00:02Z", "level": "INFO", "component": "network", "startup_attempt_id": "ATT-058", "message": "Workstation interface link is up."}
+{"event_id": "LOG-026-04", "timestamp": "2026-11-07T10:00:03Z", "level": "INFO", "component": "network", "startup_attempt_id": "ATT-058", "message": "Ping observation for 192.0.2.11: 3 sent, 3 received."}
+{"event_id": "LOG-026-05", "timestamp": "2026-11-07T10:00:04Z", "level": "ERROR", "component": "handshake", "startup_attempt_id": "ATT-058", "message": "Handshake rejected: observed protocol 1 is not in supported protocols [2].", "error_code": "DEMO_PROTOCOL_MISMATCH"}
+{"event_id": "LOG-026-06", "timestamp": "2026-11-07T10:00:08Z", "level": "ERROR", "component": "startup", "startup_attempt_id": "ATT-058", "message": "Initialization stopped at handshake_accepted.", "error_code": "DEMO_PROTOCOL_MISMATCH"}

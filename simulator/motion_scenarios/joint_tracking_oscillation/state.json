@@ -1,0 +1,173 @@
+{
+  "schema_version": "motion-1.0",
+  "bench_id": "BENCH-001",
+  "snapshot_id": "SNAP-218",
+  "test_id": "TEST-218",
+  "observations": {
+    "read_motion_test_conditions": {
+      "bench_id": "BENCH-001",
+      "snapshot_id": "SNAP-218",
+      "evidence_id": "EV-218-01",
+      "source_type": "synthetic",
+      "observation_origin": "synthetic_test_record",
+      "observed_at": "2026-11-08T10:00:06Z",
+      "status": "ok",
+      "data": {
+        "test_id": "TEST-218",
+        "joint_id": "DEMO-JOINT-01",
+        "procedure_id": "DEMO-JOINT-STEP-001 v1",
+        "execution_mode": "offline_synthetic",
+        "action": {
+          "initial_rad": 0.0,
+          "target_rad": 0.2,
+          "step_at_s": 0.5
+        },
+        "observation_window_s": [
+          0.0,
+          6.0
+        ],
+        "sample_period_s": 0.01,
+        "control_period_s": 0.001,
+        "payload_record": {
+          "fixture_id": "DEMO-FIXTURE-A",
+          "payload_id": "DEMO-LOAD-A"
+        },
+        "equivalent_inertia": {
+          "value": 0.05,
+          "unit": "kg*m^2"
+        },
+        "test_context_status": "complete",
+        "registered_baseline": {
+          "origin": "asset_registry",
+          "payload_id": "DEMO-LOAD-A",
+          "equivalent_inertia_kg_m2": 0.05
+        }
+      },
+      "unavailable_fields": []
+    },
+    "read_control_configuration": {
+      "bench_id": "BENCH-001",
+      "snapshot_id": "SNAP-218",
+      "evidence_id": "EV-218-02",
+      "source_type": "synthetic",
+      "observation_origin": "synthetic_test_record",
+      "observed_at": "2026-11-08T10:00:06Z",
+      "status": "ok",
+      "data": {
+        "mode": "PD",
+        "kp": 4.0,
+        "ki": 0.0,
+        "kd": 0.1,
+        "torque_limit_nm": 2.0,
+        "config_revision": "CTRL-012",
+        "registered_baseline": {
+          "origin": "asset_registry",
+          "kp": 4.0,
+          "ki": 0.0,
+          "kd": 0.85
+        },
+        "change_records": [
+          {
+            "field": "kd",
+            "from": 0.85,
+            "to": 0.1,
+            "recorded_at": "2026-11-08T09:50:00Z"
+          }
+        ]
+      },
+      "unavailable_fields": []
+    },
+    "read_motion_test_results": {
+      "bench_id": "BENCH-001",
+      "snapshot_id": "SNAP-218",
+      "evidence_id": "EV-218-03",
+      "source_type": "synthetic",
+      "observation_origin": "derived_calculation",
+      "observed_at": "2026-11-08T10:00:06Z",
+      "status": "ok",
+      "data": {
+        "metrics_version": "joint-step-metrics-v1",
+        "sample_count": 601,
+        "data_integrity": "complete",
+        "response_requirement_status": "fail",
+        "metrics": [
+          {
+            "metric_id": "overshoot_pct",
+            "value": 58.530043632994214,
+            "unit": "%",
+            "requirement_id": "DEMO-RESP-01",
+            "threshold": 5.0,
+            "operator": "le",
+            "result": "fail",
+            "reason": null,
+            "window_s": [
+              0.5,
+              6.0
+            ]
+          },
+          {
+            "metric_id": "settling_time_s",
+            "value": 2.56,
+            "unit": "s",
+            "requirement_id": "DEMO-RESP-02",
+            "threshold": 1.5,
+            "operator": "le",
+            "result": "fail",
+            "reason": null,
+            "window_s": [
+              0.5,
+              6.0
+            ]
+          },
+          {
+            "metric_id": "steady_state_error_rad",
+            "value": -4.4483913440263906e-06,
+            "unit": "rad",
+            "requirement_id": "DEMO-RESP-03",
+            "threshold": 0.002,
+            "operator": "abs_le",
+            "result": "pass",
+            "reason": null,
+            "window_s": [
+              5.5,
+              6.0
+            ]
+          },
+          {
+            "metric_id": "peak_abs_error_rad",
+            "value": 0.2,
+            "unit": "rad",
+            "requirement_id": null,
+            "threshold": null,
+            "operator": null,
+            "result": "informational",
+            "reason": null,
+            "window_s": [
+              0.5,
+              6.0
+            ]
+          },
+          {
+            "metric_id": "saturation_fraction",
+            "value": 0.0,
+            "unit": "fraction",
+            "requirement_id": null,
+            "threshold": null,
+            "operator": null,
+            "result": "informational",
+            "reason": null,
+            "window_s": [
+              0.5,
+              6.0
+            ]
+          }
+        ],
+        "trajectory_id": "TRJ-218",
+        "trajectory_sha256": "a8a414d66436424b0029543571557edf6137371f45e216ac5b10a8a43225e692",
+        "model_version": "joint-inertia-pd-v1",
+        "procedure_id": "DEMO-JOINT-STEP-001 v1"
+      },
+      "unavailable_fields": []
+    }
+  }
+}
