@@ -44,9 +44,9 @@ class FakeClaude:
         context = json.loads(kwargs["messages"][0]["content"])
         client = next(f["fact_id"] for f in context["bound_facts"] if f["field"] == "client_version")
         chunk = context["knowledge"][0]["chunk_id"]
-        payload = {"language": "zh", "fact_ids": [client], "interpretations": [{
-            "text": "对照配置与兼容规则核查。", "fact_ids": [client], "chunk_ids": [chunk]}],
-            "questions": [], "next_steps": ["由工程师评估下一步。"]}
+        payload = {"language": "en", "fact_ids": [client], "interpretations": [{
+            "text": 'Check against the configuration and compatibility rules.', "fact_ids": [client], "chunk_ids": [chunk]}],
+            "questions": [], "next_steps": ['Ask an engineer to assess the next steps.']}
         if self.invalid_first and len(self.calls) == 1:
             payload = {}
         return SimpleNamespace(stop_reason="tool_use", usage=SimpleNamespace(input_tokens=10, output_tokens=5),
@@ -82,8 +82,8 @@ class WorkflowTests(unittest.TestCase):
         self.assertEqual(result["node_history"], ["collect_evidence", "retrieve_knowledge", "check_evidence",
             "generate_report", "validate_report", "review_report", "finalize"])
         self.assertEqual(result["usage"], {"input_tokens": 12, "output_tokens": 6})
-        self.assertIn('本次运行的客户端版本："2.0.0" [EV-026-02]', result["answer"])
-        self.assertIn('登记的期望客户端版本："1.4.0" [EV-026-01]', result["answer"])
+        self.assertIn('Installed client version: "2.0.0" [EV-026-02]', result["answer"])
+        self.assertIn('Registered expected client version: "1.4.0" [EV-026-01]', result["answer"])
         self.assertEqual(len(claude.calls), 1)
 
     def test_healthy_path_does_not_force_clarification(self):
@@ -150,7 +150,7 @@ class WorkflowTests(unittest.TestCase):
         result, _, _ = self.run_graph(reviewer=failed_review)
         self.assertEqual(result["status"], "escalated")
         self.assertEqual(result["generation_attempts"], 2)
-        self.assertNotIn("事实（程序生成）", result["answer"])
+        self.assertNotIn('Facts (application-rendered)', result["answer"])
         self.assertNotIn("finalize", result["node_history"])
 
     def test_sqlite_pause_and_fresh_graph_resume_uses_saved_observations(self):
@@ -169,16 +169,16 @@ class WorkflowTests(unittest.TestCase):
             with SqliteSaver.from_conn_string(path) as saver:
                 app = build_workflow(second_model, None, None, saver, passed_review)
                 snapshot = app.get_state(config)
-                check_resume(snapshot, "暂不清楚。", "test-knowledge", "fake")
-                result = app.invoke(Command(resume="暂不清楚。"), config)
+                check_resume(snapshot, 'I do not know yet.', "test-knowledge", "fake")
+                result = app.invoke(Command(resume='I do not know yet.'), config)
                 self.assertEqual(result["status"], "completed")
                 self.assertEqual(result["evidence"], saved)
                 self.assertEqual(result["node_history"].count("collect_evidence"), 1)
                 self.assertEqual(result["node_history"].count("retrieve_knowledge"), 1)
-                self.assertEqual(result["user_context"], "暂不清楚。")
+                self.assertEqual(result["user_context"], 'I do not know yet.')
                 self.assertIsNone(next(f["value"] for f in result["facts"].values()
                                       if f["field"] == "controller_version"))
-                self.assertEqual(json.loads(second_model.calls[0]["messages"][0]["content"])["user_context_unverified"], "暂不清楚。")
+                self.assertEqual(json.loads(second_model.calls[0]["messages"][0]["content"])["user_context_unverified"], 'I do not know yet.')
                 with self.assertRaisesRegex(ValueError, "not waiting"):
                     check_resume(app.get_state(config), "again", "test-knowledge", "fake")
 

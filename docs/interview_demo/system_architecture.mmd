@@ -1,0 +1,19 @@
+flowchart TB
+    subgraph Evidence[Evidence sources: synthetic data]
+        A[Versioned local JSON and CSV]
+        B[WSL ROS 2 publisher] --> C[ROS subscriber: complete capture]
+        C --> D[Localhost read-only HTTP]
+    end
+    A --> E[Windows read-only adapter]
+    D --> E
+    E --> F[Validate identity and hash; recompute metrics; freeze evidence]
+    F --> G[LangGraph state and checkpoints]
+    H[Curated procedures and requirements] --> I[Chroma retrieval]
+    I --> G
+    G --> J[Claude: structured interpretation]
+    J --> K[Application source validation and model review]
+    K --> G
+    G --> L[Streamlit: report and draft]
+    L --> M[Engineer: edit, approve or cancel]
+    M --> N[Idempotent local ticket store]
+    G -. Node and model traces .-> O[LangSmith]

@@ -51,7 +51,7 @@ def tool_round():
 
 def report_response(fact_id="EV-039-03::controller_version", chunk_id="rule::c01"):
     return response([{"type": "tool_use", "id": "report", "name": "submit_analysis", "input": {
-        "language": "zh", "fact_ids": [fact_id],
+        "language": "en", "fact_ids": [fact_id],
         "interpretations": [{"text": "Further verification is needed.", "fact_ids": [fact_id], "chunk_ids": [chunk_id]}],
         "questions": ["Which endpoint is intended?"], "next_steps": ["Verify the intended endpoint."]}}], "tool_use")
 
@@ -95,7 +95,7 @@ class DiagnosisTests(unittest.TestCase):
         self.assertEqual([r["tool_use_id"] for r in results], ["t0", "t1", "t2", "t3"])
         self.assertIsNone(json.loads(results[2]["content"])["data"]["controller_version"])
         self.assertNotIn("connection_timeout", json.dumps(claude.requests))
-        self.assertIn("事实（程序生成）", result["answer"])
+        self.assertIn('Facts (application-rendered)', result["answer"])
         self.assertEqual(result["facts"][0]["evidence_id"], "EV-039-01")
 
     def test_ungrounded_early_answer_is_rejected(self):
@@ -124,7 +124,7 @@ class DiagnosisTests(unittest.TestCase):
         claude = FakeClaude([tool_round(), response([{"type": "text", "text": "Wrong facts: controller version 999."}], "end_turn"), report_response()])
         result = self.run_case(claude)
         self.assertNotIn("999", result["answer"])
-        self.assertIn("未知", result["answer"])
+        self.assertIn('Unknown', result["answer"])
 
     def test_truncated_answer_is_not_accepted(self):
         with self.assertRaisesRegex(RuntimeError, "truncated"):

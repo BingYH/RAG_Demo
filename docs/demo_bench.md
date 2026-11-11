@@ -1,80 +1,103 @@
-# 模拟台架定义：Demo Bench v1
+# Synthetic bench definition: Demo Bench v1
 
-状态：第一版设计基线；知识文档、三个状态素材、只读诊断、LangGraph 检索/纠正与 SQLite 恢复，以及本地工单草稿、修改/审批/取消和幂等创建已实现。实际图与使用方式见 [LangGraph 工作流说明](langgraph_workflow.md) 和 [工单闭环](ticket_workflow.md)。本文定义知识文档、模拟工具和评估案例的共同约定。
+Status: initial design baseline. Knowledge, three fixtures, read-only diagnosis,
+LangGraph retrieval/correction/SQLite recovery and local ticket draft/edit/
+approve/cancel/idempotent creation are implemented. See [Workflow](langgraph_workflow.md)
+and [Tickets](ticket_workflow.md). This document defines the shared contract for
+knowledge, tools and evaluation cases.
 
-## 1. 定位与组成
+## 1. Positioning and components
 
-演示对象为 `BENCH-001`：一套受 Franka FCI 架构启发的虚构单臂功能测试台架。故障主线是工作站软件更新后初始化失败。第一版只验证连接准备、配置与诊断信息收集，不执行机械臂运动或 PID 调参。
+BENCH-001 is a fictional single-arm functional-test bench inspired by Franka FCI
+architecture. The initial fault story is failed initialization after workstation
+updates. This baseline checks connection readiness, configuration and diagnostics;
+it does not execute movement or tune PID.
 
-```text
-工程师 → Streamlit → LangGraph 工作流 → Claude / RAG
-                          │
-                          ├─ 只读诊断工具 → 本地合成状态与日志
-                          └─ 确认后创建工单 → 本地工单记录
+~~~text
+Engineer → Streamlit → LangGraph → Claude / RAG
+                           ├─ Read-only tools → synthetic local state/logs
+                           └─ Confirmed ticket creation → local records
 
-被模拟的工程系统：
-测试工作站 → Demo Client → 专用以太网连接 → Demo Controller → 七轴机械臂
-                  └─ 状态采集与初始化日志
-```
+Simulated engineering system:
+Workstation → Demo Client → dedicated Ethernet → Demo Controller → seven-axis arm
+                 └─ State acquisition and initialization logs
+~~~
 
-| 组件 | 第一版定义 |
+| Component | Initial definition |
 | --- | --- |
-| 测试工作站 | 虚构 Ubuntu 24.04 工作站；它是被诊断的对象，不是开发者当前 Windows 电脑 |
-| Demo Client | 虚构机器人客户端与测试启动程序；模拟版本信息、连接过程和初始化状态 |
-| 网络 | 一个工作站接口和一个控制器端点；工具返回预设检查结果，不实际扫描或连接任何 IP |
-| Demo Controller | 虚构控制器，提供模拟握手、外部接口可用性和状态流观察结果 |
-| 机械臂 | 虚构七轴机械臂，第一版不包含动力学、轨迹执行或运动控制数据 |
-| ROS 2 | 架构背景采用 Jazzy；第一版不启动节点，`ros2_nodes` 为未采集，不伪造实时 ROS 运行验证 |
+| Workstation | Fictional Ubuntu 24.04 host being diagnosed, not the developer's Windows PC |
+| Demo Client | Fictional robot client/startup program with version, connection and initialization records |
+| Network | One workstation interface and controller endpoint; preset observations, no scanning or actual IP connections |
+| Demo Controller | Fictional handshake, external-interface and state-stream observations |
+| Arm | Fictional seven-axis arm; initial scope has no dynamics, trajectory execution or control data |
+| ROS 2 | Jazzy architectural background; initial fixtures start no nodes, and ros2_nodes is not collected |
 
-RAG 使用 `knowledge/` 中经整理的公开知识与合成台架规程。原始参考仓库、本文、场景目录和评估答案不直接进入索引。本文只作为编写知识与代码的设计依据，之后拆分出可检索的文档。
+RAG indexes curated public-background/synthetic procedures under knowledge/.
+Raw repos, this design, scenarios and evaluation answers are excluded. This is
+an authoring baseline for later searchable documents.
 
-## 2. 真实技术背景与合成规则
+## 2. Real background versus synthetic rules
 
-真实背景见 [来源索引](sources.md)：FCI 总览、网络连接要求、连接与 UDP 超时的区别、版本兼容概念和 ROS 2 bring-up 参数。
+[Sources](sources.md) cover FCI architecture, network requirements, connection
+versus UDP timeouts, compatibility and ROS 2 bring-up parameters.
 
-本台架的标识、地址、版本、协议号、工具字段、状态机、时间窗口和错误码均为项目设计。Demo Client 不是 libfranka，Demo Controller 的协议号不是 FCI 的真实协议版本；不由这些合成版本推断真实产品兼容性。
+Bench identifiers, addresses, versions, protocols, fields, state machine, windows
+and error codes are project-designed. Demo Client is not libfranka; Demo
+Controller protocols are not actual FCI protocol versions. Synthetic versions
+cannot establish real-product compatibility.
 
-新增 `libfranka-common` 仅作为协议类型、握手版本与机器人状态定义的源码参考。其 robot / gripper 协议版本应分别理解，也不等于 libfranka 软件包版本。第一版不实现该协议或直接解析其二进制结构。
+libfranka-common is a source reference for protocol types, handshake versions
+and state definitions. Robot/gripper protocol versions are separate and are not
+the libfranka package version. This initial version implements neither the
+protocol nor its binary parsing.
 
-合成基准配置：
-
-| 项目 | 值 |
+| Baseline item | Value |
 | --- | --- |
-| 台架 / 机器人模型 | `BENCH-001` / `DEMO-ARM-7` |
-| 工作站地址 | `192.0.2.10/24`（文档示例地址，仅用于模拟） |
-| 资产登记的控制器地址 | `192.0.2.11`（登记值，不保证等于当前现场事实） |
-| 默认运行配置目标地址 | `192.0.2.11` |
-| 基准客户端 | `demo-client 1.4.0`，支持合成协议 `[1]` |
-| 更新后客户端 | `demo-client 2.0.0`，支持合成协议 `[2]` |
-| 控制器软件 | `demo-controller 1.3.0`，报告合成协议 `1` |
-| 兼容规则 | 握手观测的控制器协议必须属于当前客户端支持集合；规则来自项目合成兼容文档 |
-| 状态流可用 | 最近 2 秒模拟观察窗口内至少有一条有效状态记录；只代表诊断可用，不代表实时控制性能合格 |
+| Bench / model | BENCH-001 / DEMO-ARM-7 |
+| Workstation | 192.0.2.10/24, documentation-only simulated address |
+| Registered controller | 192.0.2.11, a registry value rather than guaranteed current fact |
+| Default target | 192.0.2.11 |
+| Baseline client | demo-client 1.4.0, synthetic protocols [1] |
+| Updated client | demo-client 2.0.0, synthetic protocols [2] |
+| Controller | demo-controller 1.3.0, reports synthetic protocol 1 |
+| Compatibility | Observed controller protocol must belong to the current client's supported set, per synthetic guidance |
+| Available state stream | At least one valid record in a two-second observation window; diagnostic availability, not real-time control acceptance |
 
-## 3. 初始化状态与成功定义
+## 3. Initialization state and success
 
-合成初始化阶段固定为：`not_started → config_loaded → endpoint_reachable → handshake_accepted → state_received → diagnostic_ready`。失败时保留 `last_completed_stage`、`failed_stage`、`error_code`、`error_message` 和日志证据；它们表示启动程序观察到的失败，不代表最终根因。
+Stages: not_started → config_loaded → endpoint_reachable → handshake_accepted →
+state_received → diagnostic_ready. Failure retains last_completed_stage,
+failed_stage, error_code, error_message and log evidence. These describe the
+startup program's observed failure, not the established root cause.
 
-`diagnostic_ready` 表示本次配置已加载、连接和握手成功且状态流可读取。它不代表机械臂可运动、安全系统获批准、校准通过或完整功能测试通过。
+diagnostic_ready means this configuration loaded, connection/handshake succeeded
+and a state stream was readable. It does not establish movement authorization,
+safety approval, calibration or complete functional acceptance.
 
-正常路径可以不创建工单；异常路径先收集证据、引用依据并提出下一步。证据不足时保留未知项，不能强行判定硬件损坏或宣布问题已修复。
+Healthy cases need not create tickets. Fault cases gather/cite evidence and
+suggest verification. Missing evidence stays unknown; do not force a hardware
+damage conclusion or claim a repair.
 
-## 4. 只读工具与可观察字段
+## 4. Read-only interfaces and observable fields
 
-第一版采用本地函数工具，后续可替换为 ROS 2 / REST 适配器；这些字段是项目接口，不是厂商 API。所有工具只允许查询当前会话绑定的 `BENCH-001`。
+Local functions may later be replaced by ROS/REST adapters. They are project
+interfaces, not vendor APIs. Tools query only the session-bound BENCH-001.
 
-| 工具 | 输入 | 返回内容 |
+| Tool | Input | Returned information |
 | --- | --- | --- |
-| `read_bench_inventory` | `bench_id` | `robot_model`、登记的工作站/控制器地址、期望的软件基线、登记时间；标记为 `asset_registry`，不冒充实时观测 |
-| `read_runtime_config` | `bench_id` | 当前安装的 `client_version`、`supported_protocols`、加载的 `config_revision`、`target_ip`、`execution_mode=fixture`、启动尝试 ID 及变更记录摘要 |
-| `read_connection_observations` | `bench_id` | 配置端点的 `link_up`、`ping` 检查、握手状态，以及实际取得的 `controller_version` / `reported_protocol`；不可达时远端值未知 |
-| `read_initialization_status` | `bench_id` | 初始化阶段、错误码/错误消息、`external_interface_enabled`、状态流记录数与窗口、`ros2_nodes`；未取得的状态不能填作 false |
-| `read_diagnostic_log` | `bench_id`、`limit`（默认 20，范围 1～100） | 最近的合成日志事件：`event_id`、时间、级别、组件、消息及启动尝试 ID；日志按时间升序返回 |
+| read_bench_inventory | bench_id | robot_model, registered workstation/controller addresses, expected software baseline and registration time; asset_registry, not live observation |
+| read_runtime_config | bench_id | client_version, supported_protocols, config_revision, target_ip, execution_mode=fixture, startup attempt and change summary |
+| read_connection_observations | bench_id | link_up, ping, handshake and actually obtained controller_version/reported_protocol; remote fields unknown if unreachable |
+| read_initialization_status | bench_id | stages, error, external_interface_enabled, state count/window and ros2_nodes; missing is not false |
+| read_diagnostic_log | bench_id, limit default 20, range 1–100 | Recent synthetic event_id/time/level/component/message/startup attempt, ascending by time |
 
-`read_connection_observations` 中 `ping` 固定包含 `status`、发送/接收数量和 RTT；没有回包时 RTT 为 `null`。握手状态为 `accepted`、`rejected`、`not_attempted` 或 `unknown`。仅返回明确由本次握手取得的远端值。
+Ping always contains status, sent/received counts and RTT; no reply gives null
+RTT. Handshake states: accepted, rejected, not_attempted, unknown. Remote values
+must have actually been obtained during the current handshake.
 
-每次工具响应使用统一包络：
+Common response envelope:
 
-```json
+~~~json
 {
   "bench_id": "BENCH-001",
   "snapshot_id": "SNAP-001",
@@ -85,52 +108,88 @@ RAG 使用 `knowledge/` 中经整理的公开知识与合成台架规程。原�
   "data": {},
   "unavailable_fields": []
 }
-```
+~~~
 
-- `status` 为 `ok`、`partial` 或 `error`。`ok` 表示工具成功返回，不等于台架检查通过；成功取得的 ping timeout 仍是有效证据。
-- 未知字段使用 `null`，并在 `unavailable_fields` 记录字段路径与原因（如 `endpoint_unreachable`、`not_collected`）。不得用默认正常值填补。
-- 工具本身失败时 `status=error`、`data=null`，附 `error.code` 和简短消息；工具错误不转写成机器人故障结论。
-- 登记信息的 `observed_at` 为登记时间；其他数据为合成观测时间。跨来源冲突要同时保留并解释来源差异。
-- 同一会话绑定一个不可变快照，时间戳均为带时区的 ISO 8601。场景历史回放以快照时间为参照，不拿当前电脑时间直接判为过期。
-- `snapshot_id` 使用无语义标识，不包含 `healthy`、`version_mismatch` 或 `connection_timeout`；不向模型发送 fixture 路径、场景名称、预期根因或标准答案。
-- 相同请求在同一快照内返回相同证据 ID，方便引用和去重。版本/配置不同快照的证据不能不加说明地混用。
+- status is ok, partial or error. ok means acquisition succeeded, not that the
+  bench passed; an observed ping timeout is valid evidence.
+- Unknowns use null with field/reason in unavailable_fields, such as
+  endpoint_unreachable or not_collected. Never fill with normal defaults.
+- Tool failure uses status=error, data=null and a short error.code/message.
+  Tool failures are not robot fault conclusions.
+- Registry observed_at is registration time; other times are synthetic
+  observations. Preserve conflicting sources and explain their differences.
+- Each session binds an immutable snapshot with timezone-aware ISO 8601.
+  Historical snapshots are interpreted relative to snapshot time, not marked
+  stale against the current PC clock.
+- Neutral snapshot IDs exclude healthy/version_mismatch/connection_timeout.
+  Fixture paths, scenario names, expected causes and answers do not reach the model.
+- Identical requests against a snapshot return identical evidence IDs for
+  citation/deduplication. Do not silently mix versions/configurations across snapshots.
 
-## 5. 三个第一版场景
+## 5. Three initial scenarios
 
-场景由开发者或评估器选择，助手只能调用诊断工具。每个场景使用独立的无语义快照 ID，并保留一致的启动尝试与时间顺序。
+The developer/evaluator selects scenarios; the assistant only calls tools.
+Each has neutral IDs and consistent attempt/time ordering. Expectations below
+are implementation/evaluation guidance, excluded from RAG.
 
-| Fixture 目录 | 合成可见状态 | 预期行为（只供实现与评估，不进入 RAG） |
+| Fixture | Visible synthetic state | Expected behavior |
 | --- | --- | --- |
-| `healthy/` | 客户端 1.4.0，配置地址 .11；ping 有回复，握手接受且报告协议 1，状态流有记录，阶段为 diagnostic_ready | 判断本次诊断初始化可用；如用户仍报告故障，澄清时间与复现条件，不能据此认定所有功能正常 |
-| `version_mismatch/` | 更新记录为客户端 1.4.0 → 2.0.0；配置地址 .11，ping 有回复；握手拒绝但已返回控制器版本和协议 1，客户端支持 [2]；无可用状态流 | 结合合成兼容文档确认当前配置不兼容；建议经验证的配置对齐及复测，不能自动执行安装或回滚 |
-| `connection_timeout/` | 当前配置地址 .12，登记地址 .11；链路 up，但配置端点 ping 超时；握手未开始，远端版本与协议未知；最后完成 config_loaded，日志为连接等待超时 | 指出配置与登记值不一致，作为优先核查线索；不能证明 .11 实际可达，也不能排除登记过期或其他网络问题；建议人工核对，必要时形成工单 |
+| healthy/ | Client 1.4.0, target .11, ping reply, accepted handshake/protocol 1, state records, diagnostic_ready | Confirm diagnostic initialization only; clarify continuing complaints and reproduction, without declaring all functions healthy |
+| version_mismatch/ | Update 1.4.0 → 2.0.0, target .11, ping reply, rejected handshake with observed version/protocol 1 versus supported [2], no stream | Cite synthetic compatibility, identify incompatible combination and propose reviewed alignment/retest; no installation/rollback |
+| connection_timeout/ | Target .12 versus registry .11, link up, ping timeout, no handshake, remote versions unknown, last stage config_loaded and wait-timeout log | Prioritize address discrepancy without proving .11 reachable, excluding stale registry or other network problems; request human checks and optionally draft a ticket |
 
-上述错误码使用 `DEMO_CONNECT_TIMEOUT`、`DEMO_PROTOCOL_MISMATCH` 等 `DEMO_` 前缀。真实厂商错误字符串仅在公开知识中保留其原始语境，不把合成日志伪装为真实设备记录。
+Codes use DEMO_ prefixes such as DEMO_CONNECT_TIMEOUT and DEMO_PROTOCOL_MISMATCH.
+Real vendor errors retain original context in public knowledge; synthetic logs
+must not impersonate actual device records.
 
-`state.json` 仅包含可观察状态、来源与变更记录；`diagnostic.log` 包含对应事件。预期行为、场景加载映射及评估标签由应用/评估侧管理，不暴露给模型。模拟器不根据模型猜测修改快照；第一版没有“修复后自动变健康”的机制。
+state.json contains observations, sources and change records; diagnostic.log
+contains corresponding events. Expectations, scenario mapping and evaluation
+labels stay application-side. The simulator does not change state based on the
+model's guess or automatically become healthy after advice.
 
-## 6. 追问、结论与工单
+## 6. Questions, conclusions and tickets
 
-开场信息可以只有“更新后初始化失败”。助手优先读取工具已有的信息；仍缺少的故障时间、用户看到的完整报错、实际更新范围和复现条件再追问，避免重复索要已取得的数据。
+The opening may simply say initialization failed after an update. Read available
+tool data first; ask only for missing failure time, full user-visible error,
+update scope or reproduction details.
 
-答案区分：已知事实（引用 evidence_id）、适用规则（引用文档片段 ID）、待验证假设，以及下一步建议。资料与现场证据冲突时保留冲突；缺失资料或工具失败时可降级生成注明缺口的支持工单，不捏造明确根因。
+Distinguish facts with evidence IDs, applicable rules with chunk IDs, hypotheses
+and next steps. Preserve conflicts. Missing knowledge/tool failures can produce
+an explicitly incomplete support draft rather than an invented cause.
 
-事实来源绑定已落实：诊断循环从实际工具返回中提取 `fact_id`、工具名、字段路径、原值、来源类型、证据 ID、快照与时间；Claude 只选择事实 ID，通过 `submit_analysis` 提交解读和知识片段引用。最终事实的标签、数值与引用由程序生成。登记与当前版本/地址配对显示；不可达时的远端未知值不由登记值替换。完整事实注册表和结构化报告随结果写入本地与 Trace。模型推断的语义正确性仍需独立检查。
+Field binding is implemented: actual tool results supply fact_id, tool/field,
+original value, origin, evidence/snapshot/time. Claude selects IDs and submits
+interpretations/knowledge references with submit_analysis. Code renders fact
+labels, values and citations. Registry/current versions and addresses appear as
+pairs; registry data never replaces unreachable remote values. Full facts and
+structured reports are saved locally/in traces. Semantic inference still needs review.
 
-工单草稿至少包含台架 ID、问题描述、相关配置/版本、已执行检查、证据与知识引用、未解决问题及建议下一步。人工可修改、确认或取消。确认后的工具写入 `data/tickets/`，返回工单 ID；基于当前会话和已确认草稿版本去重，修改草稿后必须重新确认。确认状态由工作流掌握，不能让模型仅传 `approved=true` 就触发写入。
+Drafts include bench, description, configurations/versions, checks, evidence/
+knowledge references, unresolved questions and next steps. Humans edit, approve
+or cancel. Approved writes go to data/tickets/ with IDs, deduplicated by thread
+and approved revision. Edits require reapproval. Workflow-owned confirmation
+cannot be bypassed with a model-supplied approved=true.
 
-第一版不实际执行 ping、网络改配、进程重启、安装/回滚、运动命令、故障清除、安全配置修改或 PID 参数调整。工具不会读取 Windows 本机网络状态来伪装成台架证据。
+Initial tools execute no ping, network changes, restarts, installation/rollback,
+movement, fault clearing, safety changes or PID adjustments. They never disguise
+the Windows PC's own network state as bench evidence.
 
-## 7. 后续材料与验收
+## 7. Materials and acceptance
 
-下一步按本定义编写五类知识材料：台架概览、合成版本与配置规则、初始化及证据采集规程、连接异常排查、支持工单规则。用 `source_type=synthetic` 明确项目自定义事实；公开技术说明使用来源索引中的 ID 与适用版本。
+The initial five categories are overview, synthetic versions/configuration,
+initialization/evidence procedure, connection troubleshooting and support tickets.
+Project rules use source_type=synthetic. Public concepts retain source IDs and versions.
 
-模拟器实现时验收：
+Acceptance:
 
-1. 三个场景均可通过相同工具接口读取，快照、时间和证据引用保持一致。
-2. 不可达场景的远端值保持未知；工具失败、检查失败和未采集能被区分。
-3. 正常场景不误报产品通过全部测试；版本场景能引用兼容规则；超时场景只形成有依据的假设。
-4. 没有知识/工具返回泄露场景标签或预设根因；未知台架 ID 与越界日志数量明确拒绝。
-5. 工单确认、修改、取消和恢复不重复创建的行为可验证；不调用任何真实设备。
+1. All scenarios share interfaces and consistent snapshots, times and references.
+2. Unreachable remote values stay unknown; tool failure, failed checks and not-collected differ.
+3. Healthy does not imply whole-product pass; mismatches cite rules; timeouts support bounded hypotheses.
+4. Tools/knowledge do not leak labels/expected causes; unknown IDs and invalid limits are rejected.
+5. Approval/edit/cancel/idempotent resume are verifiable without real devices.
 
-当前不需要用户补充内部资料、真实机器人日志或硬件。默认使用 Windows 开发、英文演示知识和合成日志，设计说明用中文。过温保持扩展候选。关节超调/振荡扩展已实现独立运动证据接口并接入 LangGraph，见 [关节响应案例](joint_response_demo.md)；通过任务类型选择，不改变本文第一版初始化字段和三个场景。
+No internal material, real logs or hardware is needed. Development uses Windows,
+English project documentation/knowledge and synthetic logs. Overtemperature is
+still a candidate. The [Joint-response extension](joint_response_demo.md) now has
+independent evidence and graph task selection, without changing these initial
+fields/scenarios.

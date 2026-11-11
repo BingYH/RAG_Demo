@@ -101,7 +101,7 @@ class MotionWorkflowTests(unittest.TestCase):
                 app = build_workflow(model, MotionIndex(), MotionSession(SCENARIOS[2]), saver, approve_review, store)
                 paused = app.invoke(self.state(True, "motion-resume"), config)
                 self.assertEqual(paused["status"], "awaiting_input")
-                self.assertIn("负载", paused["__interrupt__"][0].value["question"])
+                self.assertIn('load', paused["__interrupt__"][0].value["question"])
                 self.assertEqual(model.contexts, [])
                 saved = copy.deepcopy(paused["evidence"])
             with SqliteSaver.from_conn_string(db) as saver:

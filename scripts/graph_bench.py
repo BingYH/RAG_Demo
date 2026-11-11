@@ -96,8 +96,8 @@ def main():
     thread_id = args.resume or args.retry or args.thread_id or uuid4().hex
     if not re.fullmatch(r"[A-Za-z0-9_-]{1,80}", thread_id):
         parser.error("Thread ID must contain 1 to 80 letters, numbers, underscores or hyphens.")
-    question = args.question or ("BENCH-001 单关节位置响应测试，请根据记录的条件、配置与指标帮助分析。"
-                                 if args.task == "joint_response" else "BENCH-001 更新后台架初始化失败，请帮我排查。")
+    question = args.question or ('Analyze the BENCH-001 single-joint position response using the recorded conditions, configuration and metrics.'
+                                 if args.task == "joint_response" else 'BENCH-001 initialization failed after an update. Help investigate.')
     if not question.strip() or len(question) > 4000:
         parser.error("Question must contain 1 to 4000 characters.")
     from rag_demo.config import load_environment
@@ -191,7 +191,7 @@ def main():
         for payload in payloads:
             if payload["kind"] == "clarification":
                 print("\n" + payload["question"], flush=True)
-                print(f'Resume: .\\.venv\\Scripts\\python.exe scripts/graph_bench.py --resume {thread_id} --reply "你的说明"', flush=True)
+                print(f'Resume: .\\.venv\\Scripts\\python.exe scripts/graph_bench.py --resume {thread_id} --reply "your explanation"', flush=True)
             else:
                 if state.get("answer"):
                     print("\n" + state["answer"], flush=True)

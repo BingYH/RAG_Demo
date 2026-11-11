@@ -1,0 +1,55 @@
+flowchart TB
+    root["RAG_Demo/"]
+    root --> entry["Project entry points"]
+    entry --> ui["streamlit_app.py - bilingual Dashboard"]
+    entry --> guidance["README.md / AGENTS.md / RAG_DEMO_PLAN.md"]
+    entry --> config["requirements.txt / .streamlit/config.toml / .gitignore"]
+
+    root --> app["rag_demo/ - AI application"]
+    app --> workflow["workflow.py - LangGraph state and routing"]
+    app --> reasoning["diagnosis.py / review.py - generation and review"]
+    app --> grounding["retrieval.py / facts.py - retrieval and source binding"]
+    app --> support["dashboard.py / tickets.py / tracing.py / config.py / ui_i18n.py"]
+
+    root --> knowledge["knowledge/ - curated RAG documents"]
+    knowledge --> topics["00_overview/ / 10_configuration/ / 20_procedures/"]
+    knowledge --> guidance_topics["30_troubleshooting/ / 50_support/"]
+    knowledge --> reserved["40_cases/ - reserved; archived/ - excluded from current index"]
+
+    root --> simulator["simulator/ - synthetic evidence and read-only tools"]
+    simulator --> models["motion.py / motion_tools.py / tools.py"]
+    simulator --> transport["ros_capture.py / http_motion.py"]
+    simulator --> initial["scenarios/ - initialization state.json and diagnostic.log"]
+    simulator --> motion["motion_scenarios/ - joint-response state.json and trajectory.csv"]
+
+    root --> ros["ros2/bench_replay/ - project-owned ROS 2 package"]
+    ros --> nodes["bench_replay/publisher.py / collector.py / runtime.py"]
+    ros --> package["package.xml / setup.py / setup.cfg / resource/"]
+
+    root --> scripts["scripts/ - run, inspect, validate and prepare"]
+    scripts --> run["graph_bench.py / diagnose_bench.py / smoke_trace.py"]
+    scripts --> bridge["ros_replay_bridge.py / build_ros_replay.sh / run_ros_replay.sh"]
+    scripts --> inspect["inspect_*.py / generate_motion_fixtures.py / validate_fixtures.py"]
+    scripts --> checks["evaluate_review.py / check_language.py / setup and verification scripts"]
+    scripts --> presentation["prepare_interview_demo.py / render_interview_diagrams.py"]
+
+    root --> docs["docs/ - design, operation and provenance"]
+    docs --> design["Bench, motion, workflow, tickets, Dashboard and WSL/ROS guides"]
+    docs --> interview["interview_demo/ - notes, run of show, Mermaid, SVG and PNG"]
+    docs --> provenance["sources.md / source_manifest.json / diagnosis_validation.md"]
+
+    root --> tests["tests/ - offline tests with fake models"]
+    root --> evaluation["evaluation/cases/ - review regression inputs, excluded from RAG"]
+
+    root --> data["data/ - ignored local runtime artifacts"]
+    data --> persisted["checkpoints/ / runs/ / tickets/ / ros_captures/"]
+    data --> generated["index/ / models/ / motion_reports/ / presentation/ / wsl_validation/"]
+
+    root --> references["references/repos/ - ignored third-party clones; keep unchanged"]
+    references --> vendors["docs / libfranka / libfranka-common / franka_ros2 / franka_description / labs"]
+    root --> environment[".venv/ - ignored local Python dependencies"]
+
+    classDef local fill:#fff4df,stroke:#ae751b,color:#43351c
+    classDef external fill:#edf0f5,stroke:#6a788b,color:#27374a
+    class data,persisted,generated local
+    class references,vendors,environment external

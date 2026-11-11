@@ -10,6 +10,7 @@ from streamlit.testing.v1 import AppTest
 
 from rag_demo.dashboard import DashboardService
 from rag_demo.tickets import TicketStore, content_hash
+from rag_demo.ui_i18n import translate
 from tests.test_motion_workflow import MotionIndex
 from tests.test_ros_capture import complete
 from simulator.http_motion import HttpMotionSession, RosCaptureError
@@ -30,13 +31,17 @@ class FakeModel:
         else:
             context = json.loads(kwargs["messages"][0]["content"])
             fid = next(f["fact_id"] for f in context["bound_facts"] if f["field"] == "metrics.overshoot_pct")
-            payload = {"language": "zh", "fact_ids": [fid], "interpretations": [{
-                "text": "响应超限，需核对测试条件。", "fact_ids": [fid], "chunk_ids": [context["knowledge"][0]["chunk_id"]]}],
-                "questions": [], "next_steps": ["保留未知项，交由工程师核查。"]}
+            payload = {"language": "en", "fact_ids": [fid], "interpretations": [{
+                "text": 'The response exceeds a limit; verify the test conditions.', "fact_ids": [fid], "chunk_ids": [context["knowledge"][0]["chunk_id"]]}],
+                "questions": [], "next_steps": ['Retain unknowns for engineering review.']}
             if context.get("response_language") == "en":
                 payload["language"] = "en"
                 payload["interpretations"][0]["text"] = "The response exceeds the demo limit. Retain the missing test context."
                 payload["next_steps"] = ["Ask an engineer to verify the missing records."]
+            elif context.get("response_language") == "zh":
+                payload["language"] = "zh"
+                payload["interpretations"][0]["text"] = translate(payload["interpretations"][0]["text"], "zh")
+                payload["next_steps"] = [translate(step, "zh") for step in payload["next_steps"]]
         return SimpleNamespace(stop_reason="tool_use", usage=SimpleNamespace(input_tokens=10, output_tokens=5),
             content=[SimpleNamespace(model_dump=lambda **_: {"type": "tool_use", "name": name, "input": payload})])
 
@@ -59,7 +64,7 @@ class DashboardTests(unittest.TestCase):
 
     def start(self, thread="ui-test"):
         return self.service.execute(thread, task_type="joint_response", scenario="joint_tracking_load_unknown",
-                                    question="请分析本次测试", ticket=True)
+                                    question='Analyze this test', ticket=True)
 
     def test_service_pause_resume_edit_stale_approval_and_idempotency(self):
         view = self.start()
@@ -68,7 +73,7 @@ class DashboardTests(unittest.TestCase):
         before = copy.deepcopy(view["state"]["evidence"])
         self.service.read("ui-test")
         self.assertEqual(self.model.calls, [])
-        draft_view = self.service.execute("ui-test", decision="暂不清楚，请保留未知项。")
+        draft_view = self.service.execute("ui-test", decision='I do not know; retain the unknowns.')
         self.assertEqual(draft_view["state"]["evidence"], before)
         self.assertEqual(len(self.model.calls), 2)
         old_hash = content_hash(draft_view["state"]["ticket_draft"])
@@ -88,7 +93,7 @@ class DashboardTests(unittest.TestCase):
         self.start()
         with self.assertRaises(ValueError):
             self.start()
-        self.service.execute("ui-test", decision="不知道。")
+        self.service.execute("ui-test", decision='I do not know.')
         result = self.service.execute("ui-test", decision={"action": "cancel"})
         self.assertEqual(result["state"]["status"], "ticket_cancelled")
         self.assertFalse(list((Path(self.tmp.name) / "tickets").glob("DEMO-TKT-*.json")))
@@ -100,28 +105,28 @@ class DashboardTests(unittest.TestCase):
             self.assertFalse(app.exception)
             self.assertEqual(self.model.calls, [])
             app.text_input(key="load_id").set_value("from-cli")
-            next(b for b in app.button if b.label == "载入会话").click().run()
+            next(b for b in app.button if b.label == 'Open thread').click().run()
             self.assertFalse(app.exception)
             self.assertEqual(app.session_state["active_thread"], "from-cli")
             self.assertEqual(self.model.calls, [])
-            app.text_area(key="reply-from-cli").set_value("暂不清楚。")
-            next(b for b in app.button if b.label == "提交说明并继续").click().run()
+            app.text_area(key="reply-from-cli").set_value('I do not know yet.')
+            next(b for b in app.button if b.label == 'Submit context and continue').click().run()
             self.assertFalse(app.exception)
             self.assertEqual(len(self.model.calls), 2)
 
-            next(b for b in app.button if b.label == "刷新会话").click().run()
+            next(b for b in app.button if b.label == 'Refresh thread').click().run()
             self.assertEqual(len(self.model.calls), 2)
-            next(b for b in app.button if b.label == "确认创建本地工单").click().run()
-            self.assertTrue(any("勾选" in w.value for w in app.warning))
+            next(b for b in app.button if b.label == 'Approve and create local ticket').click().run()
+            self.assertTrue(any('check' in w.value for w in app.warning))
             self.assertEqual(self.service.read("from-cli")["state"]["status"], "awaiting_ticket_approval")
             digest = content_hash(self.service.read("from-cli")["state"]["ticket_draft"])
             app.text_area(key=digest + "engineer_notes").set_value("Reviewed UI demo")
-            next(b for b in app.button if b.label == "保存修改并重新审批").click().run()
+            next(b for b in app.button if b.label == 'Save changes for re-approval').click().run()
             self.assertFalse(app.exception)
             digest = content_hash(self.service.read("from-cli")["state"]["ticket_draft"])
             self.assertFalse(app.checkbox(key="reviewed-" + digest).value)
             app.checkbox(key="reviewed-" + digest).check()
-            next(b for b in app.button if b.label == "确认创建本地工单").click().run()
+            next(b for b in app.button if b.label == 'Approve and create local ticket').click().run()
             self.assertFalse(app.exception)
             self.assertEqual(self.service.read("from-cli")["state"]["status"], "ticket_created")
             self.assertEqual(len(self.model.calls), 2)
@@ -130,6 +135,8 @@ class DashboardTests(unittest.TestCase):
         from rag_demo.tickets import render_draft
         with patch("rag_demo.dashboard.DashboardService", return_value=self.service):
             app = AppTest.from_file(str(APP), default_timeout=30).run()
+            self.assertEqual(app.selectbox(key="ui_language").value, "en")
+            self.assertEqual(app.title[0].value, "From test anomalies to evidence-based action")
             app.selectbox(key="ui_language").set_value("en").run()
             self.assertFalse(app.exception)
             self.assertEqual(app.title[0].value, "From test anomalies to evidence-based action")
@@ -147,6 +154,9 @@ class DashboardTests(unittest.TestCase):
             self.assertFalse(app.exception)
             saved = self.service.read(thread)
             self.assertEqual(saved["state"]["report"]["language"], "en")
+            self.assertTrue({"Observed facts", "Analysis and hypotheses", "Open questions and evidence gaps",
+                             "Recommended next steps", "Issue details"}.issubset({item.value for item in app.subheader}))
+            self.assertTrue(any(frame.value.shape[0] for frame in app.dataframe))
             self.assertIn("REQUIRED RESPONSE LANGUAGE: English", self.model.calls[0]["system"])
             draft = saved["state"]["ticket_draft"]
             self.assertEqual(draft["language"], "en")
@@ -154,12 +164,26 @@ class DashboardTests(unittest.TestCase):
             old_hash = content_hash(draft)
             app.selectbox(key="ui_language").set_value("zh").run()
             self.assertFalse(app.exception)
+            self.assertEqual(app.title[0].value, translate("From test anomalies to evidence-based action", "zh"))
+            self.assertIn(translate("Observed facts", "zh"), {item.value for item in app.subheader})
             self.assertEqual(len(self.model.calls), 2)
-
             self.assertEqual(content_hash(self.service.read(thread)["state"]["ticket_draft"]), old_hash)
             app.selectbox(key="ui_language").set_value("en").run()
             self.assertFalse(app.exception)
             self.assertEqual(len(self.model.calls), 2)
+
+    def test_explicit_chinese_diagnosis_keeps_optional_localized_report_and_draft(self):
+        from rag_demo.tickets import render_draft
+        view = self.service.execute("chinese-demo", task_type="joint_response",
+            scenario="joint_tracking_load_unknown", question="Analyze this test", ticket=True, output_language="zh")
+        self.assertIn(translate("The load context for this joint test is incomplete. Which tool/fixture and payload were used, did they change, and is a corresponding record available? If you do not know, please say so.", "zh"),
+                      view["interrupts"][0]["question"])
+        view = self.service.execute("chinese-demo", decision="Unknown; keep the evidence gap.")
+        state = view["state"]
+        self.assertEqual(state["status"], "awaiting_ticket_approval")
+        self.assertEqual(state["report"]["language"], "zh")
+        self.assertIn(translate("Facts (application-rendered)", "zh"), state["answer"])
+        self.assertIn(translate("Ticket draft", "zh"), render_draft(state["ticket_draft"]))
 
     def ros_session(self, expected_capture_id=None):
         payload = complete().frozen

@@ -1,0 +1,12 @@
+flowchart LR
+    A[Define test requirements] --> B[Capture and validate evidence]
+    B --> C[Calculate metrics in Python]
+    C --> D[Compare configuration and conditions]
+    D --> E{Required context complete?}
+    E -->|No| F[Ask engineer; retain unknowns]
+    E -->|Yes| G[Retrieve guidance and form hypotheses]
+    F --> G
+    G --> H[Validate sources and review report]
+    H --> I[Engineer reviews support draft]
+    I -->|Approve exact revision| J[Create local ticket]
+    J -. Proposed next engineering step .-> K[Approved comparable retest]

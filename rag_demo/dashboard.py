@@ -1,12 +1,15 @@
 """UI adapter over the existing graph/checkpoints. Rendering never calls a model."""
 
 import json
+
 import hashlib
 import os
 import re
 import threading
 from pathlib import Path
 from uuid import uuid4
+
+from rag_demo.ui_i18n import translate
 
 from langgraph.checkpoint.sqlite import SqliteSaver
 from langgraph.types import Command
@@ -26,7 +29,7 @@ _locks: dict[str, threading.Lock] = {}
 _guard = threading.Lock()
 
 
-def failure_message(exc, language="zh"):
+def failure_message(exc, language="en"):
     """Explain SDK failures without exposing response bodies or credentials."""
     from anthropic import APIConnectionError, APITimeoutError, APIStatusError
     if language == "en":
@@ -45,26 +48,26 @@ def failure_message(exc, language="zh"):
             return f"The model service returned HTTP {exc.status_code}. Check access and service settings. Recorded evidence is preserved."
         return f"This run did not finish ({type(exc).__name__}). Check connection and configuration. Saved evidence is preserved."
     if isinstance(exc, APITimeoutError):
-        return "模型请求超时，无法据此判断额度。请检查服务网络；当前证据已保存。"
+        return translate('The model request timed out. Check the server connection; this does not establish a credit issue. Recorded evidence is preserved.', 'zh')
     if isinstance(exc, APIConnectionError):
-        return "无法连接模型 API，尚未收到服务端响应；这不是额度耗尽提示。请检查启动服务的网络权限、代理或连接。当前证据已保存。"
+        return translate('Cannot connect to the model API; no server response was received. This is not a credit-balance error. Check network permissions and proxy settings. Recorded evidence is preserved.', 'zh')
     if isinstance(exc, APIStatusError):
         body = getattr(exc, "body", None)
         error = body.get("error", body) if isinstance(body, dict) else {}
         message = str(error.get("message", "")).lower() if isinstance(error, dict) else ""
         if exc.status_code in (400, 402) and any(word in message for word in ("credit balance", "spend limit", "billing")):
-            return "模型服务返回额度或账单限制，请到 Claude Console 核对余额与消费上限。"
+            return translate('The model service reported a billing or spending limit. Check your credits and spend limits in Claude Console.', 'zh')
         if exc.status_code in (401, 403):
-            return "模型服务拒绝访问，请核对 API Key 与账号权限。"
+            return translate('The model service denied access. Check the API key and account permissions.', 'zh')
         if exc.status_code == 429:
-            return "模型服务返回请求频率限制，请稍后重试；这不等于余额耗尽。"
-        return f"模型服务返回 HTTP {exc.status_code}，本轮未完成。当前证据已保存。"
-    return f"本轮未完成（{type(exc).__name__}）。请检查网络和配置；已保存的状态仍可查看。不要重复开始同一诊断。"
+            return translate('The model service returned a rate limit. Try later; this does not mean credits are exhausted.', 'zh')
+        return translate("The model service returned HTTP ", "zh") + str(exc.status_code) + translate(". This run did not finish. Recorded evidence is preserved.", "zh")
+    return translate("This run did not finish (", "zh") + type(exc).__name__ + translate("). Check connection and configuration. Saved evidence is preserved. Do not restart the same diagnosis repeatedly.", "zh")
 
 
 def valid_thread(thread_id):
     if not isinstance(thread_id, str) or not re.fullmatch(r"[A-Za-z0-9_-]{1,80}", thread_id):
-        raise ValueError("会话编号须为 1～80 个字母、数字、下划线或连字符。")
+        raise ValueError('Thread ID must contain 1 to 80 letters, digits, underscores or hyphens.')
 
 
 class DashboardService:
@@ -153,7 +156,7 @@ class DashboardService:
         with _guard:
             lock = _locks.setdefault(key, threading.Lock())
         if not lock.acquire(blocking=False):
-            raise ValueError("该会话正在执行，请等待完成后刷新。")
+            raise ValueError('This thread is running. Wait for completion, then refresh.')
         try:
             return self._execute(thread_id, task_type, scenario, question, ticket, decision, retry, on_node, output_language,
                                  data_source, ros_port, expected_capture_id)
@@ -169,13 +172,13 @@ class DashboardService:
             resuming = decision is not None or retry
             if resuming:
                 if task_type or scenario or question or ticket or output_language or data_source or ros_port or expected_capture_id:
-                    raise ValueError("恢复使用原会话的任务、证据与工单请求。")
+                    raise ValueError("Resume uses the original thread's task, evidence and ticket request.")
                 if not snapshot.values or snapshot.values.get("workflow_version") != WORKFLOW_VERSION:
-                    raise ValueError("会话不存在或版本已变化，请新建会话。")
+                    raise ValueError('Thread not found or workflow version changed. Start a new thread.')
                 task_type = snapshot.values["task_type"]
             else:
                 if snapshot.values:
-                    raise ValueError("会话已存在，请载入后继续，或创建新会话。")
+                    raise ValueError('Thread already exists. Open it to continue, or create a new thread.')
                 data_source = data_source or "local_json"
                 if data_source == "wsl_ros":
                     if task_type != "joint_response" or scenario is not None or not expected_capture_id:
@@ -183,11 +186,11 @@ class DashboardService:
                 elif data_source == "local_json":
                     allowed = MOTION_SCENARIOS if task_type == "joint_response" else INIT_SCENARIOS
                     if task_type not in TASK_SCOPES or scenario not in allowed or ros_port or expected_capture_id:
-                        raise ValueError("任务与工况不匹配。")
+                        raise ValueError('Task and scenario do not match.')
                 else:
                     raise ValueError("Unknown data source.")
                 if not isinstance(question, str) or not question.strip() or len(question) > 4000:
-                    raise ValueError("问题须为 1～4000 个字符。")
+                    raise ValueError('Question must contain 1 to 4000 characters.')
             session, source_metadata = None, {}
             if not resuming:
                 if data_source == "wsl_ros":
@@ -240,7 +243,7 @@ class DashboardService:
                         record["trace_url"] = verify_trace(root, 2, expected_names={"bench-workflow", *visited})
                         record["trace_verified"] = True
                     except Exception:
-                        record["trace_note"] = "本次追踪未完成回读验证；请勿为此重复调用模型。"
+                        record["trace_note"] = 'Trace read-back verification did not finish. Do not repeat the model call for this reason.'
             finally:
                 if client is not None:
                     client.flush()

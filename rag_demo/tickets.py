@@ -3,6 +3,7 @@
 import copy
 import hashlib
 import json
+
 import os
 import re
 import sqlite3
@@ -10,6 +11,8 @@ import tempfile
 from contextlib import closing
 from datetime import datetime, timezone
 from pathlib import Path
+
+from rag_demo.ui_i18n import translate
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -42,10 +45,10 @@ def build_draft(state: dict) -> dict:
              if isinstance(r.get("data"), dict) and r["data"].get("test_id")}
     if len(snapshots) > 1 or len(attempts) > 1 or len(tests) > 1:
         raise ValueError("Cannot draft a ticket from mixed snapshots or startup attempts.")
-    language = state.get("output_language") or report.get("language", "zh")
-    editable = EditableTicket(title="BENCH-001 support request" if language == "en" else "BENCH-001 技术支持请求", description=state["question"],
+    language = state.get("output_language") or report.get("language", "en")
+    editable = EditableTicket(title="BENCH-001 support request" if language == "en" else translate('BENCH-001 support request', 'zh'), description=state["question"],
         requested_support="Review the collected evidence and configuration, resolve remaining gaps and assess the next verification steps."
-        if language == "en" else "请核查已收集的证据与配置，确认未解决事项并评估下一步验证。", engineer_notes="")
+        if language == "en" else translate('Review the collected evidence and configuration, resolve remaining gaps and assess the next verification steps.', 'zh'), engineer_notes="")
     return {
         "schema_version": "1.1", "revision": 1, "bench_id": "BENCH-001", "language": language,
         "task_type": state.get("task_type", "initialization"), "test_id": next(iter(tests), None),
@@ -175,24 +178,24 @@ class TicketStore:
 
 
 def render_draft(draft: dict, language: str | None = None) -> str:
-    language = language or draft.get("language", "zh")
+    language = language or draft.get("language", "en")
     def text(zh, en):
         return en if language == "en" else zh
     labels = {
-        "heading": text("\u5de5\u5355\u8349\u7a3f", "Ticket draft"),
-        "identity": text("\u53f0\u67b6 / \u5feb\u7167 / \u6d4b\u8bd5", "Bench / snapshot / test"),
-        "description": text("\u95ee\u9898\u63cf\u8ff0", "Description"),
-        "support": text("\u8bf7\u6c42\u652f\u6301", "Requested support"),
-        "notes": text("\u5de5\u7a0b\u5e08\u5907\u6ce8\uff08\u4eba\u5de5\u8f93\u5165\uff09", "Engineer notes (human input)"),
-        "context": text("\u7528\u6237\u80cc\u666f\uff08\u672a\u9a8c\u8bc1\uff09", "User context (unverified)"),
-        "facts": text("\u4e8b\u5b9e\u4e0e\u6765\u6e90", "Facts and sources"),
-        "interpretation": text("\u8bca\u65ad\u89e3\u8bfb\uff08\u6a21\u578b\u63a8\u65ad\uff09", "Interpretation (model inference)"),
-        "gaps": text("\u5f85\u89e3\u51b3\u4e8b\u9879\u4e0e\u5efa\u8bae", "Open issues and next steps"),
-        "checks": text("\u5df2\u6536\u96c6\u68c0\u67e5\u4e0e\u77e5\u8bc6\u5f15\u7528", "Completed checks and knowledge references"),
+        "heading": text(translate('Ticket draft', 'zh'), "Ticket draft"),
+        "identity": text(translate('Bench / snapshot / test', 'zh'), "Bench / snapshot / test"),
+        "description": text(translate('Description', 'zh'), "Description"),
+        "support": text(translate('Requested support', 'zh'), "Requested support"),
+        "notes": text(translate('Engineer notes (human input)', 'zh'), "Engineer notes (human input)"),
+        "context": text(translate('User context (unverified)', 'zh'), "User context (unverified)"),
+        "facts": text(translate('Facts and sources', 'zh'), "Facts and sources"),
+        "interpretation": text(translate('Interpretation (model inference)', 'zh'), "Interpretation (model inference)"),
+        "gaps": text(translate('Open issues and next steps', 'zh'), "Open issues and next steps"),
+        "checks": text(translate('Completed checks and knowledge references', 'zh'), "Completed checks and knowledge references"),
     }
-    none = text("\u65e0", "None")
+    none = text(translate('None', 'zh'), "None")
     lines = [f"## {labels['heading']} r{draft['revision']}: {draft['title']}",
-             text("数据源", "Data source") + ": " + draft.get("data_source", "local_json"),
+             text(translate('Data source', 'zh'), "Data source") + ": " + draft.get("data_source", "local_json"),
              f"{labels['identity']}: {draft['bench_id']} / {draft['snapshot_id']} / {draft.get('test_id') or draft.get('startup_attempt_id')}",
              labels["description"] + ": " + draft["description"], labels["support"] + ": " + draft["requested_support"],
              labels["notes"] + ": " + (draft["engineer_notes"] or none),
@@ -200,7 +203,7 @@ def render_draft(draft: dict, language: str | None = None) -> str:
     for fact in draft["facts"]:
         val = json.dumps(fact["value"], ensure_ascii=False)
         if fact["unavailable_reason"]:
-            val = text("\u672a\u77e5", "Unknown") + " (" + fact["unavailable_reason"] + ")"
+            val = text(translate('Unknown', 'zh'), "Unknown") + " (" + fact["unavailable_reason"] + ")"
         elif fact["value"] is None:
             val = none
         lines.append(f"- {fact['labels'][1 if language == 'en' else 0]}: {val} [{fact['evidence_id']}]")
@@ -210,13 +213,13 @@ def render_draft(draft: dict, language: str | None = None) -> str:
         refs = list(dict.fromkeys([facts[f]["evidence_id"] for f in claim["fact_ids"]] + claim["chunk_ids"]))
         lines.append("- " + claim["text"] + " " + "".join(f"[{ref}]" for ref in refs))
     if not draft["interpretations"]:
-        lines.append("- " + text("\u65e0\u901a\u8fc7\u590d\u6838\u7684\u89e3\u8bfb\uff0c\u4ec5\u63d0\u4ea4\u8bc1\u636e\u7f3a\u53e3\u3002", "No reviewed interpretation; evidence gaps only."))
+        lines.append("- " + text(translate('No reviewed interpretation; evidence gaps only.', 'zh'), "No reviewed interpretation; evidence gaps only."))
     lines.append("\n### " + labels["gaps"])
     lines += ["- " + i for i in draft["unresolved_questions"] + draft["evidence_gaps"] + draft["proposed_next_steps"]] or ["- " + none]
     lines.append("\n### " + labels["checks"])
     for name, observation in draft["completed_checks"].items():
         lines.append(f"- {name}: {observation['status']} [{observation.get('evidence_id', 'no evidence ID')}]")
     lines += ["- " + c["chunk_id"] for c in draft["knowledge_references"]]
-    lines.append(text("\u9644\u4ef6\uff1a\u65e0\u3002\u539f\u59cb\u68c0\u67e5\u6570\u636e\u4e0e\u5b8c\u6574\u5b57\u6bb5\u4fdd\u5b58\u5728\u8349\u7a3f JSON \u5185\u3002\u5de5\u5355\u72b6\u6001\u4ee5\u5de5\u4f5c\u6d41\u7684\u521b\u5efa\u56de\u6267\u4e3a\u51c6\uff1b\u4e0d\u53d1\u9001\u5916\u90e8\u7cfb\u7edf\u3002",
+    lines.append(text(translate('Attachments: none. Raw checks and full fields are in the draft JSON. Ticket creation is determined by the workflow receipt; nothing is sent externally.', 'zh'),
         "Attachments: none. Raw checks and full fields are in the draft JSON. Ticket creation is determined by the workflow receipt; nothing is sent externally."))
     return "\n".join(lines)

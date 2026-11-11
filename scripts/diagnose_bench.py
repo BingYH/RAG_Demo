@@ -16,7 +16,7 @@ from simulator.tools import DiagnosticSession, SCENARIOS
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--scenario", choices=SCENARIOS, default="connection_timeout")
-    parser.add_argument("--question", default="BENCH-001 更新后台架初始化失败，请帮我排查。")
+    parser.add_argument("--question", default='BENCH-001 initialization failed after an update. Help investigate.')
     parser.add_argument("--index-only", action="store_true", help="Build/query local knowledge without API calls")
     parser.add_argument("--query", default="connection timeout configured endpoint registration address discrepancy")
     args = parser.parse_args()
